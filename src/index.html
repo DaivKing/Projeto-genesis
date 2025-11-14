@@ -3,16 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
   <title>Análise de Custos</title>
-  <link rel="stylesheet" href="style.css">
-
   <!-- Chart.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Análise de Custos</h1>
+  <!--
+    Projeto: Análise de Custos
+    Professor: Genesis
+    Descrição: Visualização gráfica do custo total em função da produção.
+    Autores: David, Georges
+    Data: 2025
+  -->
+  <header class="header">
+    <h1>Análise de Custos</h1>
+    <p class="subtitle">Visualize como o custo total varia conforme a produção.</p>
+  </header>
 
-  <canvas id="graficoCusto"></canvas>
+  <main class="container">
+    <section class="grafico-section">
+      <!-- O elemento canvas agora tem largura e altura fixas para melhor proporção -->
+      <canvas id="graficoCusto" width="700" height="400" aria-label="Gráfico de Custo Total" role="img"></canvas>
+    </section>
+    <section class="descricao-section">
+      <h2>Sobre o Gráfico</h2>
+      <p>
+        O gráfico abaixo mostra a relação entre a quantidade produzida e o custo total, considerando custos fixos e variáveis.<br>
+        <strong>Fórmula:</strong> <code>C(x) = a·x² + b·x + c</code>
+      </p>
+      <ul>
+        <li><b>a</b>: Custo que cresce com a produção (R$ 0,50 por unidade²)</li>
+        <li><b>b</b>: Custo variável (R$ -10 por unidade)</li>
+        <li><b>c</b>: Custo fixo (R$ 200)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>Projeto acadêmico &copy; 2025</small>
+  </footer>
 
   <!-- Carrega o JS depois do HTML -->
   <script src="index.js"></script>
