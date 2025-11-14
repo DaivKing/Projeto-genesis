@@ -12,35 +12,72 @@
 </head>
 
 <body>
-  <h1>Análise de Custos</h1>
-  <div class="card">
-    <h2>Parâmetros da Função</h2>
+  <main>
+    <h1 class="titulo">Análise de Custos</h1>
+    <section class="contexto-section card" style="margin-bottom:2.5rem;">
+      <h2 style="margin-top:0;">Sobre o projeto</h2>
+      <p>
+        Este sistema foi desenvolvido para facilitar o estudo e a compreensão de funções de custo na economia e administração. Com ele, você pode simular diferentes cenários de produção, visualizar o comportamento dos custos e identificar o ponto de produção mais eficiente.
+      </p>
+      <ul>
+        <li>Explore como o custo total, médio e marginal variam conforme a quantidade produzida.</li>
+        <li>Descubra o ponto de mínimo custo e como os parâmetros afetam o resultado.</li>
+        <li>Ideal para estudantes, professores e profissionais de gestão.</li>
+      </ul>
+      <p style="margin-bottom:0; color:#2563eb; font-weight:500;">Preencha os parâmetros, clique em <b>Gerar Análise</b> e veja o gráfico ganhar vida!</p>
+    </section>
+    <div class="layout-flex">
+    <section class="card card-parametros">
+      <h2>Parâmetros da Função</h2>
+      <p style="margin-top:0; color:#555; font-size:0.98rem;">
+        Ajuste os valores abaixo para simular diferentes cenários de produção. Os parâmetros representam:
+        <ul style="margin:0 0 0.5rem 1.2rem; color:#444;">
+          <li><b>a</b>: Custo variável acelerado (crescimento quadrático do custo)</li>
+          <li><b>b</b>: Custo variável linear (crescimento proporcional ao volume)</li>
+          <li><b>c</b>: Custo fixo (independe da produção)</li>
+        </ul>
+      </p>
+      <form id="form-parametros">
+        <div class="input-group">
+          <label for="a">Custo Variável Acelerado (a):</label>
+          <input type="number" id="a" value="0.5" step="0.01">
+        </div>
+        <div class="input-group">
+          <label for="b">Custo Variável Linear (b):</label>
+          <input type="number" id="b" value="-10" step="0.01">
+        </div>
+        <div class="input-group">
+          <label for="c">Custo Fixo (c):</label>
+          <input type="number" id="c" value="200" step="0.01">
+        </div>
+        <button id="gerar" type="button">Gerar Análise</button>
+      </form>
+    </section>
 
-    <label>Custo Variável Acelerado (a):
-      <input type="number" id="a" value="0.5" step="0.01">
-    </label>
+      <!-- Seção do gráfico centralizada -->
+      <section class="grafico-section oculto" id="grafico-container">
+        <canvas id="graficoCusto"></canvas>
+      </section>
+    <section class="card card-resultados">
+      <h2>Resultados</h2>
+      <p style="margin-top:0; color:#555; font-size:0.98rem;">
+        Após gerar a análise, veja abaixo os principais indicadores para o cenário escolhido:
+      </p>
+      <p id="resultado-minimo">Ponto mínimo: --</p>
+      <p id="resultado-custo-minimo">Custo mínimo: --</p>
+      <p id="resultado-cm">Custo médio (x=10): --</p>
+      <p id="resultado-cmg">Custo marginal (x=10): --</p>
+    </section>
 
-    <label>Custo Variável Linear (b):
-      <input type="number" id="b" value="-10" step="0.01">
-    </label>
-
-    <label>Custo Fixo (c):
-      <input type="number" id="c" value="200" step="0.01">
-    </label>
-
-    <button id="gerar">Gerar Análise</button>
-  </div>
-
-  <div class="card">
-    <h2>Resultados</h2>
-    <p id="resultado-minimo">Ponto mínimo: --</p>
-    <p id="resultado-custo-minimo">Custo mínimo: --</p>
-    <p id="resultado-cm">Custo médio (x=10): --</p>
-    <p id="resultado-cmg">Custo marginal (x=10): --</p>
-  </div>
-
-  <canvas id="graficoCusto"></canvas>
-
+    <section class="grafico-section">
+      <canvas id="graficoCusto"></canvas>
+    </section>
+  </main>
+  <footer class="footer">
+    Projeto acadêmico - Análise de Custos &copy; 2025<br>
+    Desenvolvido por <b>David</b> e <b>Georges Ballister</b>.<br>
+    <span style="font-size:0.97em; color:#444;">UNIFG - Projeto para fins didáticos e de aprendizado.</span>
+  </footer>
   <script src="index.js"></script>
 </body>
 </html>
