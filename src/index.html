@@ -3,40 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
   <title>Análise de Custos</title>
-
   <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <h1>Análise de Custos com Função Quadrática</h1>
-
-  <div class="card">
-    <h2>Parâmetros da Função</h2>
-
-    <label>Custo Variável Acelerado (a):
-      <input type="number" id="a" value="0.5" step="0.01">
-    </label>
-
-    <label>Custo Variável Linear (b):
-      <input type="number" id="b" value="-10" step="0.01">
-    </label>
-
-    <label>Custo Fixo (c):
-      <input type="number" id="c" value="200" step="0.01">
-    </label>
-
-    <button id="gerar">Gerar Análise</button>
-  </div>
-
-  <div class="card">
-    <h2>Resultados</h2>
-    <p id="resultado-minimo">Ponto mínimo: --</p>
-    <p id="resultado-custo-minimo">Custo mínimo: --</p>
-    <p id="resultado-cm">Custo médio (x=10): --</p>
-    <p id="resultado-cmg">Custo marginal (x=10): --</p>
-  </div>
+  <h1>Análise de Custos</h1>
 
   <canvas id="graficoCusto"></canvas>
 
