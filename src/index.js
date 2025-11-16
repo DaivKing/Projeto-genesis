@@ -8,7 +8,7 @@ function custoTotal(a, b, c, x) {
   // c: custo fixo
   // x: quantidade produzida
   // Retorna o custo total calculado
-  return a * x ** 2 + b * x + c;
+  return a * x * x + b * x + c;
 }
 
 // Calcula o custo médio para um dado x
@@ -38,86 +38,205 @@ function pontoMinimo(a, b, c) {
   return { xV, yV };
 }
 
-let chart = null; // Referência ao gráfico Chart.js
+// Calcula a receita para um dado x e preço p
+function receita(x, p) {
+  return p * x;
+}
+
+// Calcula o lucro para um dado x, preço p e custos a, b, c
+function lucro(a, b, c, p, x) {
+  const custo = custoTotal(a, b, c, x);
+  return receita(x, p) - custo;
+}
+
+// Para break-even: resolver ax^2 + (b - p)x + c = 0
+function calcularBreakEven(a, b, c, p) {
+  const A = a;
+  const B = b - p;
+  const C = c;
+
+  const delta = B * B - 4 * A * C;
+  if (delta < 0) {
+    return []; // sem raízes reais
+  } else if (delta === 0) {
+    const x = -B / (2 * A);
+    return [x];
+  } else {
+    const x1 = (-B + Math.sqrt(delta)) / (2 * A);
+    const x2 = (-B - Math.sqrt(delta)) / (2 * A);
+    return [x1, x2];
+  }
+}
+
+// Calcula o ponto de lucro máximo para um dado preço p
+function pontoLucroMaximo(a, b, c, p) {
+  // L(x) = p*x - (a x^2 + b x + c) = -a x^2 + (p - b)x - c
+  // Coeficiente de x^2 é -a, de x é (p - b)
+  const A = -a;
+  const B = p - b;
+  if (A === 0) {
+    return null;
+  }
+  const xV = -B / (2 * A);
+  const yV = lucro(a, b, c, p, xV);
+  return { xV, yV };
+}
+
+
+//------------------------------ Cenários ----------------------------//
+
+const cenarios = [];
+
+function adicionarCenario(nome, a, b, c, p) {
+  const cor = `hsl(${Math.random() * 360}, 70%, 50%)`;
+  cenarios.push({ nome, a, b, c, p, cor });
+}
+
+function limparCenarios() {
+  cenarios.length = 0;
+  atualizarListaCenarios();
+  gerarGrafico();
+}
+
 
 //------------------------------ Gráfico ----------------------------//
-// Gera o gráfico de custo total usando Chart.js
-function gerarGrafico(a, b, c) {
-  // Gera o gráfico de custo total usando Chart.js
-  // a, b, c: parâmetros da função de custo
-  // Gera valores de x de 0 a 20
-  const xs = Array.from({ length: 21 }, (_, i) => i);
-  // Calcula o custo total para cada x
-  const ys = xs.map(x => custoTotal(a, b, c, x));
+let chart = null; // Referência ao gráfico Chart.js
 
-  // Destroi o gráfico anterior, se existir
+function gerarGrafico() {
+  const ctx = document.getElementById("graficoPrincipal").getContext("2d");
+
+  const datasets = [];
+
+  // Para cada cenário, criar curvas
+  cenarios.forEach(cen => {
+    const { a, b, c, p, cor, nome } = cen;
+    const xs = Array.from({ length: 101 }, (_, i) => i); // de 0 a 100 unidades
+    const custoYs = xs.map(x => custoTotal(a, b, c, x));
+    const receitaYs = xs.map(x => receita(x, p));
+    const lucroYs = xs.map(x => lucro(a, b, c, p, x));
+
+    datasets.push({
+      label: `Custo — ${nome}`,
+      data: custoYs,
+      borderColor: cor,
+      fill: false,
+      tension: 0.2
+    });
+    datasets.push({
+      label: `Receita — ${nome}`,
+      data: receitaYs,
+      borderColor: cor,
+      borderDash: [5, 5], // linha tracejada
+      fill: false,
+      tension: 0.2
+    });
+    datasets.push({
+      label: `Lucro — ${nome}`,
+      data: lucroYs,
+      borderColor: cor,
+      borderDash: [10, 5],
+      fill: false,
+      tension: 0.2
+    });
+
+    // Break-even (se existir)
+    const bEs = calcularBreakEven(a, b, c, p);
+    bEs.forEach((xBE) => {
+      if (xBE >= 0 && xBE <= xs[xs.length - 1]) {
+        datasets.push({
+          label: `BE ${nome} (x=${xBE.toFixed(2)})`,
+          data: xs.map(x => (x === Math.round(xBE) ? receita(x, p) : null)),
+          borderColor: cor,
+          pointRadius: 5,
+          showLine: false
+        });
+      }
+    });
+
+    // Lucro máximo
+    const pontoL = pontoLucroMaximo(a, b, c, p);
+    if (pontoL && pontoL.xV >= 0 && pontoL.xV <= xs[xs.length - 1]) {
+      datasets.push({
+        label: `Lucro máximo ${nome} (x=${pontoL.xV.toFixed(2)})`,
+        data: xs.map(x => (x === Math.round(pontoL.xV) ? pontoL.yV : null)),
+        borderColor: cor,
+        pointRadius: 6,
+        pointStyle: 'triangle',
+        showLine: false
+      });
+    }
+  });
+
   if (chart) chart.destroy();
-
-  const ctx = document.getElementById("graficoCusto").getContext("2d");
   chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: xs,
-      datasets: [{
-        label: 'Custo Total (R$)',
-        data: ys,
-        borderColor: 'blue',
-        fill: false,
-        tension: 0.2
-      }]
-    },
+    data: { labels: Array.from({ length: 101 }, (_, i) => i), datasets },
     options: {
       scales: {
         y: { beginAtZero: true }
+      },
+      plugins: {
+        tooltip: { mode: 'index', intersect: false }
       }
     }
   });
 }
 
-//------------------------------ Resultados ----------------------------//
+//------------------------------ Interface ----------------------------//
 
-// Evento do botão para gerar análise e atualizar resultados
+function atualizarListaCenarios() {
+  const container = document.getElementById("listaCenarios");
+  container.innerHTML = '';
+
+  cenarios.forEach((cen, i) => {
+    const div = document.createElement("div");
+    div.className = "cenario";
+    div.innerHTML = `
+      <strong>${cen.nome}</strong><br>
+      a = ${cen.a}, b = ${cen.b}, c = ${cen.c}, p = ${cen.p}<br>
+      <button onclick="removerCenario(${i})">Remover</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function removerCenario(index) {
+  cenarios.splice(index, 1);
+  atualizarListaCenarios();
+  gerarGrafico();
+}
+
+//------------------------------ Resultados ----------------------------//
 document.getElementById("gerar").addEventListener("click", () => {
-  // Exibe o gráfico ao clicar no botão (remove a classe oculto)
-  const graficoContainer = document.getElementById("grafico-container");
-  if (graficoContainer.classList.contains("oculto")) {
-    graficoContainer.classList.remove("oculto");
-  }
-  // Evento do botão para gerar análise e atualizar resultados
-  // Obtém valores dos parâmetros do formulário
-  // Atualiza o gráfico
-  // Calcula o ponto mínimo
-  // Calcula o custo médio para x = 10
-  // Calcula o custo marginal para x = 10
-  // Exibe resultados na tela
-  // Obtém valores dos parâmetros
   const a = parseFloat(document.getElementById("a").value);
   const b = parseFloat(document.getElementById("b").value);
   const c = parseFloat(document.getElementById("c").value);
+  const p = parseFloat(document.getElementById("preco").value);
 
-  gerarGrafico(a, b, c);
-
-  // Calcular resultados
-  const minimo = pontoMinimo(a, b, c);
-  const cm10 = custoMedio(a, b, c, 10);
-  const cmg10 = custoMarginal(a, b, 10);
-
-  // Exibir resultados na tela
-  if (minimo) {
-    document.getElementById("resultado-minimo").innerText =
-      `Ponto mínimo (quantidade ótima): x = ${minimo.xV.toFixed(2)}`;
-
-    document.getElementById("resultado-custo-minimo").innerText =
-      `Custo mínimo: R$ ${minimo.yV.toFixed(2)}`;
+  // Se ainda não tem cenário “principal”, substitui ou adiciona
+  if (cenarios.length === 0) {
+    adicionarCenario("Principal", a, b, c, p);
   } else {
-    document.getElementById("resultado-minimo").innerText =
-      "Ponto mínimo: não existe (a = 0)";
-    document.getElementById("resultado-custo-minimo").innerText = "--";
+    // Atualiza primeiro cenário
+    cenarios[0] = { ...cenarios[0], a, b, c, p };
   }
 
-  document.getElementById("resultado-cm").innerText =
-    `Custo Médio (x = 10): R$ ${cm10.toFixed(2)}`;
+  atualizarListaCenarios();
+  gerarGrafico();
+});
 
-  document.getElementById("resultado-cmg").innerText =
-    `Custo Marginal (x = 10): R$ ${cmg10.toFixed(2)}`;
+document.getElementById("adicionar-cenario").addEventListener("click", () => {
+  const a = parseFloat(document.getElementById("a").value);
+  const b = parseFloat(document.getElementById("b").value);
+  const c = parseFloat(document.getElementById("c").value);
+  const p = parseFloat(document.getElementById("preco").value);
+
+  const nome = prompt("Nome do cenário:");
+  adicionarCenario(nome || `Cenário ${cenarios.length + 1}`, a, b, c, p);
+  atualizarListaCenarios();
+  gerarGrafico();
+});
+
+document.getElementById("limpar-cenarios").addEventListener("click", () => {
+  limparCenarios();
 });
