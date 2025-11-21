@@ -62,22 +62,48 @@ input[type="number"]:focus {
   outline: none;
 }
 
-button#gerar {
+/* Botões principais estilizados */
+.botoes-param {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+}
+button#gerar, button#adicionar-cenario, button#limpar-cenarios {
   background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 0.7rem 1.5rem;
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 0.5rem;
   box-shadow: 0 2px 8px #2563eb22;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  outline: none;
 }
-button#gerar:hover {
+button#gerar {
+  font-size: 1.13rem;
+  padding: 0.8rem 1.7rem;
+}
+button#gerar:active, button#adicionar-cenario:active, button#limpar-cenarios:active {
+  transform: scale(0.98);
+}
+button#gerar:hover, button#adicionar-cenario:hover, button#limpar-cenarios:hover {
   background: linear-gradient(90deg, #1d4ed8 60%, #3b82f6 100%);
-  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px #2563eb33;
+}
+button#adicionar-cenario, button#limpar-cenarios {
+  background: #f1f5f9;
+  color: #2563eb;
+  border: 1.5px solid #2563eb;
+  font-weight: 500;
+  padding: 0.7rem 1.2rem;
+  margin-left: 0;
+}
+button#adicionar-cenario:hover, button#limpar-cenarios:hover {
+  background: #e0e7ff;
+  color: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
 .card-resultados p {
@@ -88,14 +114,14 @@ button#gerar:hover {
 
 
 /* Seção do gráfico centralizada e responsiva */
+
 .grafico-section {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-width: 320px;
-  max-width: 700px;
-  flex: 2 1 500px;
+  max-width: 1000px;
   margin: 0 auto 2rem auto;
   height: auto;
 }
@@ -105,8 +131,9 @@ canvas {
   display: block;
   margin: 0 auto;
   width: 100% !important;
-  max-width: 650px;
-  aspect-ratio: 16/9;
+  min-height: 520px;
+  height: 500px !important;
+  aspect-ratio: 16/7;
   background: #f1f5f9;
   border-radius: 12px;
   box-shadow: 0 2px 8px #0001;

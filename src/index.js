@@ -89,25 +89,67 @@ function gerarGrafico() {
   const ctx = document.getElementById("graficoPrincipal").getContext("2d");
   const datasets = [];
 
+  // Cores fixas para cada tipo de linha
+  const corCusto = '#6366f1';      // azul violeta
+  const corReceita = '#22c55e';    // verde
+  const corLucro = '#f59e42';      // laranja
+  const corBreakEven = '#ef4444';  // vermelho
+  const corLucroMax = '#facc15';   // amarelo
+
   cenarios.forEach(cen => {
-    const { a, b, c, p, cor, nome } = cen;
+    const { a, b, c, p, nome } = cen;
 
     const custoYs = XS.map(x => custoTotal(a, b, c, x));
     const receitaYs = XS.map(x => receita(x, p));
     const lucroYs = XS.map(x => lucro(a, b, c, p, x));
 
-    datasets.push({ label: `Custo — ${nome}`, data: custoYs, borderColor: cor, fill: false, tension: 0.2 });
-    datasets.push({ label: `Receita — ${nome}`, data: receitaYs, borderColor: cor, borderDash: [5, 5], fill: false, tension: 0.2 });
-    datasets.push({ label: `Lucro — ${nome}`, data: lucroYs, borderColor: cor, borderDash: [10, 5], fill: false, tension: 0.2 });
+    datasets.push({
+      label: `Custo — ${nome}`,
+      data: custoYs,
+      borderColor: corCusto,
+      backgroundColor: corCusto + '22',
+      borderWidth: 3,
+      fill: false,
+      tension: 0.25,
+      pointRadius: 2.5,
+      pointHoverRadius: 6
+    });
+    datasets.push({
+      label: `Receita — ${nome}`,
+      data: receitaYs,
+      borderColor: corReceita,
+      backgroundColor: corReceita + '22',
+      borderDash: [8, 6],
+      borderWidth: 3,
+      fill: false,
+      tension: 0.18,
+      pointRadius: 2.5,
+      pointHoverRadius: 6
+    });
+    datasets.push({
+      label: `Lucro — ${nome}`,
+      data: lucroYs,
+      borderColor: corLucro,
+      backgroundColor: corLucro + '22',
+      borderDash: [2, 6],
+      borderWidth: 3,
+      fill: false,
+      tension: 0.18,
+      pointRadius: 2.5,
+      pointHoverRadius: 6
+    });
 
     const breakEvens = calcularBreakEven(a, b, c, p);
     breakEvens.forEach(xBE => {
       if (dentroDoRange(xBE, XS)) {
         datasets.push({
-          label: `BE ${nome} (x=${xBE.toFixed(2)})`,
+          label: `Break-even ${nome} (x=${xBE.toFixed(2)})`,
           data: XS.map(x => (x === Math.round(xBE) ? receita(x, p) : null)),
-          borderColor: cor,
-          pointRadius: 5,
+          borderColor: corBreakEven,
+          backgroundColor: corBreakEven,
+          pointRadius: 8,
+          pointStyle: 'rectRounded',
+          borderWidth: 0,
           showLine: false
         });
       }
@@ -118,9 +160,11 @@ function gerarGrafico() {
       datasets.push({
         label: `Lucro máximo ${nome} (x=${pontoL.xV.toFixed(2)})`,
         data: XS.map(x => (x === Math.round(pontoL.xV) ? pontoL.yV : null)),
-        borderColor: cor,
-        pointRadius: 6,
+        borderColor: corLucroMax,
+        backgroundColor: corLucroMax,
+        pointRadius: 11,
         pointStyle: 'triangle',
+        borderWidth: 0,
         showLine: false
       });
     }
@@ -131,8 +175,55 @@ function gerarGrafico() {
     type: 'line',
     data: { labels: XS, datasets },
     options: {
-      scales: { y: { beginAtZero: true } },
-      plugins: { tooltip: { mode: 'index', intersect: false } }
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            font: { size: 15, weight: 'bold' },
+            boxWidth: 28,
+            padding: 18,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          backgroundColor: '#2563eb',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: '#1e293b',
+          borderWidth: 1.5,
+          padding: 12
+        }
+      },
+      layout: {
+        padding: 20
+      },
+      scales: {
+        x: {
+          grid: {
+            color: '#e0e7ff',
+            lineWidth: 1.5
+          },
+          ticks: {
+            color: '#334155',
+            font: { size: 13 }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: '#e0e7ff',
+            lineWidth: 1.5
+          },
+          ticks: {
+            color: '#334155',
+            font: { size: 13 }
+          }
+        }
+      }
     }
   });
 }
@@ -163,6 +254,46 @@ function removerCenario(index) {
 function atualizarUI() {
   atualizarListaCenarios();
   gerarGrafico();
+  atualizarResultados();
+}
+
+function atualizarResultados() {
+  if (cenarios.length === 0) {
+    document.getElementById("resultado-minimo").textContent = "Ponto mínimo: --";
+    document.getElementById("resultado-custo-minimo").textContent = "Custo mínimo: --";
+    document.getElementById("resultado-cm").textContent = "Custo médio (x=10): --";
+    document.getElementById("resultado-cmg").textContent = "Custo marginal (x=10): --";
+    document.getElementById("resultado-break-even").textContent = "Break-even: --";
+    document.getElementById("resultado-lucro-max").textContent = "Lucro máximo: --";
+    return;
+  }
+  const { a, b, c, p } = cenarios[0];
+  // Ponto mínimo
+  const min = pontoMinimo(a, b, c);
+  if (min) {
+    document.getElementById("resultado-minimo").textContent = `Ponto mínimo: x = ${min.xV.toFixed(2)}`;
+    document.getElementById("resultado-custo-minimo").textContent = `Custo mínimo: R$ ${min.yV.toFixed(2)}`;
+  } else {
+    document.getElementById("resultado-minimo").textContent = "Ponto mínimo: --";
+    document.getElementById("resultado-custo-minimo").textContent = "Custo mínimo: --";
+  }
+  // Custo médio e marginal para x=10
+  document.getElementById("resultado-cm").textContent = `Custo médio (x=10): R$ ${custoMedio(a, b, c, 10).toFixed(2)}`;
+  document.getElementById("resultado-cmg").textContent = `Custo marginal (x=10): R$ ${custoMarginal(a, b, 10).toFixed(2)}`;
+  // Break-even
+  const bes = calcularBreakEven(a, b, c, p).filter(x => x >= 0);
+  if (bes.length > 0) {
+    document.getElementById("resultado-break-even").textContent = `Break-even: x = ${bes.map(x => x.toFixed(2)).join(" ou x = ")}`;
+  } else {
+    document.getElementById("resultado-break-even").textContent = "Break-even: --";
+  }
+  // Lucro máximo
+  const pl = pontoLucroMaximo(a, b, c, p);
+  if (pl && pl.xV >= 0) {
+    document.getElementById("resultado-lucro-max").textContent = `Lucro máximo: x = ${pl.xV.toFixed(2)}, lucro = R$ ${pl.yV.toFixed(2)}`;
+  } else {
+    document.getElementById("resultado-lucro-max").textContent = "Lucro máximo: --";
+  }
 }
 
 //------------------------------ Eventos ----------------------------//
